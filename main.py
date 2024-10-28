@@ -17,21 +17,63 @@ colors = {
     "brown": (139, 69, 19),
 }
 
-WIDTH = 1000
-HEIGHT = 600
-DEST = 2
+WIDTH = 300
+HEIGHT = 150
+DEST = 3
 WALL = 1
 START = -2
+VISITED = -1
+FRONTIER = 2
+FREE = 0
 cols = WIDTH // 10
 rows = HEIGHT // 10
 matrix = [[0 for _ in range(cols)] for _ in range(rows)]
 
 init_done = False
 quit = False
-canvas = pygame.display.set_mode((WIDTH, HEIGHT)) 
+canvas = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock() 
 mouse_pressed = 0
 start = (10, 20)
 dest = (30,40)
+
+def valid_neighbours(point):
+    global cols, rows
+    x = point[0]
+    y = point[1]
+    list = []
+    if(x-1 >=0):
+        list.append((x-1, y))
+    if(y+1 < cols):
+        list.append((x, y+1))
+    if(x+1 < rows):
+        list.append((x+1, y))
+    if(y-1 > 0):
+        list.append((x, y-1))
+    return list
+
+def matrix_of(index):
+    global matrix
+    return matrix[index[0]][index[1]]
+
+def matrix_assign(index, value):
+    global matrix
+    matrix[index[0]][index[1]] = value
+
+def dfs(current):
+    global clock
+    matrix_assign(current, FRONTIER)
+    draw_matrix()
+    pygame.display.update()
+    nb = valid_neighbours(current)
+    for vec in nb:
+        clock.tick(60)
+        if matrix_of(vec) == FREE:
+            dfs(vec)
+    matrix_assign(current, VISITED)
+    draw_matrix()
+    pygame.display.update()
+            
 
 
 def init_loop():
@@ -63,18 +105,21 @@ def init_loop():
             matrix[y][x] = WALL
 
     
-
-
-
 def main():
     pygame.init() 
-    global init_done, canvas, rows, cols, matrix
+    global init_done, canvas, rows, cols, matrix, start, clock
     
     pygame.display.set_caption("Maze runner") 
-
-    clock = pygame.time.Clock()
     
     init_maze()
+
+    while(init_done == False and quit == False):
+        init_loop()
+        draw_matrix()
+        pygame.display.update() 
+        clock.tick(60)
+
+    dfs(start)
 
     while(init_done == False and quit == False):
         init_loop()
@@ -97,6 +142,10 @@ def draw_matrix():
                 color = colors["red"]
             if matrix[i][j] == START:
                 color = colors["blue"]
+            if matrix[i][j] == VISITED:
+                color = colors["gray"]
+            if matrix[i][j] == FRONTIER:
+                color = colors["orange"]
             pygame.draw.rect(canvas, color, (*position, square_size, square_size))
 
 
