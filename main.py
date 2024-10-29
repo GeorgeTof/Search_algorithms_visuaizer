@@ -1,5 +1,6 @@
 import pygame 
 import random
+from queue import Queue
 
 colors = {
     "black": (0, 0, 0),
@@ -48,7 +49,7 @@ def valid_neighbours(point):
         list.append((x, y+1))
     if(x+1 < rows):
         list.append((x+1, y))
-    if(y-1 > 0):
+    if(y-1 >= 0):
         list.append((x, y-1))
     return list
 
@@ -73,6 +74,34 @@ def dfs(current):
     matrix_assign(current, VISITED)
     draw_matrix()
     pygame.display.update()
+
+
+def bfs(current):
+    global clock
+    q = Queue()
+    matrix_assign(current, FRONTIER)
+    q.put(current)
+    print(current)
+    while not q.empty():
+        current = q.get()
+        nb = valid_neighbours(current)
+        found = False
+        for x in nb:
+            if matrix_of(x) == DEST:
+                found = True
+                break
+            if matrix_of(x) == FREE:
+                matrix_assign(x, FRONTIER)
+                q.put(x)
+        matrix_assign(current, VISITED)
+        draw_matrix()
+        pygame.display.update()
+        clock.tick(60)
+        if(found):
+            break
+        
+                
+
             
 
 
@@ -81,7 +110,7 @@ def init_loop():
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             quit = True
-        elif event.type == pygame.KEYDOWN:          # only for test
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
                 color = (0, 128, 255) 
                 canvas.fill(color)
@@ -104,6 +133,16 @@ def init_loop():
         if(matrix[y][x] == 0):
             matrix[y][x] = WALL
 
+def end_loop():
+    global quit
+    for event in pygame.event.get(): 
+        if event.type == pygame.QUIT: 
+            quit = True
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                quit = True
+            if event.key == pygame.K_RETURN:
+                quit = True
     
 def main():
     pygame.init() 
@@ -119,12 +158,10 @@ def main():
         pygame.display.update() 
         clock.tick(60)
 
-    dfs(start)
+    bfs(start)
 
-    while(init_done == False and quit == False):
-        init_loop()
-        draw_matrix()
-        pygame.display.update() 
+    while(quit == False):
+        end_loop()
         clock.tick(60)
 
 
