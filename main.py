@@ -1,6 +1,6 @@
 import pygame 
 import random
-from queue import Queue
+from queue import Queue, LifoQueue
 
 colors = {
     "black": (0, 0, 0),
@@ -38,6 +38,7 @@ clock = pygame.time.Clock()
 mouse_pressed = 0
 start = (1, 2)
 dest = (3,4)
+mode = 'b'
 
 def valid_neighbours(point):
     global cols, rows
@@ -72,17 +73,30 @@ def reconstruct_path(parent):
 
 def dfs(current):
     global clock
+    st = LifoQueue()
     matrix_assign(current, FRONTIER)
-    draw_matrix()
-    pygame.display.update()
-    nb = valid_neighbours(current)
-    for vec in nb:
+    st.put(current)
+    parent = {current:None}
+    while not st.empty():
+        current = st.get()
+        nb = valid_neighbours(current)
+        found = False
+        for x in nb:
+            if matrix_of(x) == DEST:
+                found = True
+                parent[x] = current
+                break
+            if matrix_of(x) == FREE:
+                matrix_assign(x, FRONTIER)
+                parent[x] = current
+                st.put(x)
+        matrix_assign(current, VISITED)
+        draw_matrix()
+        pygame.display.update()
         clock.tick(60)
-        if matrix_of(vec) == FREE:
-            dfs(vec)
-    matrix_assign(current, VISITED)
-    draw_matrix()
-    pygame.display.update()
+        if(found):
+            break
+    reconstruct_path(parent)
 
 
 def bfs(current):
@@ -115,17 +129,17 @@ def bfs(current):
 
 
 def init_loop():
-    global init_done, canvas, matrix, mouse_pressed, quit
+    global init_done, canvas, matrix, mouse_pressed, quit, mode
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             quit = True
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                color = (0, 128, 255) 
-                canvas.fill(color)
-            if event.key == pygame.K_s:
-                color = (255, 128, 0) 
-                canvas.fill(color)
+            if event.key == pygame.K_d:
+                mode = 'd'
+                print("Mode changed to DFS")
+            if event.key == pygame.K_b:
+                mode = 'b'
+                print("Mode changed to BFS")
             if event.key == pygame.K_RETURN:
                 init_done = 1
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -163,11 +177,16 @@ def main():
 
     while(init_done == False and quit == False):
         init_loop()
+        if(quit == True):
+            return
         draw_matrix()
         pygame.display.update() 
         clock.tick(60)
 
-    bfs(start)
+    if mode == 'd':
+        dfs(start)
+    elif mode == 'b':
+        bfs(start)
 
     while(quit == False):
         end_loop()
