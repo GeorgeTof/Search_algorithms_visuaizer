@@ -71,16 +71,17 @@ def reconstruct_path(parent):
     draw_matrix()
     pygame.display.update()
 
+
 def dfs(current):
     global clock
     st = LifoQueue()
     matrix_assign(current, FRONTIER)
     st.put(current)
     parent = {current:None}
+    found = False
     while not st.empty():
         current = st.get()
         nb = valid_neighbours(current)
-        found = False
         for x in nb:
             if matrix_of(x) == DEST:
                 found = True
@@ -96,8 +97,8 @@ def dfs(current):
         clock.tick(60)
         if(found):
             break
-    reconstruct_path(parent)
-
+    if(found):
+        reconstruct_path(parent)
 
 def bfs(current):
     global clock
@@ -105,10 +106,10 @@ def bfs(current):
     matrix_assign(current, FRONTIER)
     q.put(current)
     parent = {current:None}
+    found = False
     while not q.empty():
         current = q.get()
         nb = valid_neighbours(current)
-        found = False
         for x in nb:
             if matrix_of(x) == DEST:
                 found = True
@@ -124,7 +125,8 @@ def bfs(current):
         clock.tick(60)
         if(found):
             break
-    reconstruct_path(parent)
+    if(found):
+        reconstruct_path(parent)
         
 
 
@@ -153,8 +155,9 @@ def init_loop():
         mouse_pos = pygame.mouse.get_pos()
         x = mouse_pos[0] // 10
         y = mouse_pos[1] // 10
-        if(matrix[y][x] == 0):
-            matrix[y][x] = WALL
+        if(x>=0 and x<cols and y>=0 and y<rows):
+            if(matrix[y][x] == 0):
+                matrix[y][x] = WALL
 
 def end_loop():
     global quit
