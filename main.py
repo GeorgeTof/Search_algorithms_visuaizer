@@ -9,7 +9,7 @@ colors = {
     "green": (20, 100, 20),
     "blue": (0, 0, 255),
     "yellow": (255, 255, 0),
-    "cyan": (0, 255, 255),
+    "cyan": (0, 180, 180),
     "magenta": (255, 0, 255),
     "gray": (128, 128, 128),
     "orange": (255, 165, 0),
@@ -21,10 +21,11 @@ colors = {
 WIDTH = 300
 HEIGHT = 150
 DEST = 3
+FRONTIER = 2
 WALL = 1
+PATH = -3
 START = -2
 VISITED = -1
-FRONTIER = 2
 FREE = 0
 cols = WIDTH // 10
 rows = HEIGHT // 10
@@ -35,8 +36,8 @@ quit = False
 canvas = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock() 
 mouse_pressed = 0
-start = (10, 20)
-dest = (30,40)
+start = (1, 2)
+dest = (3,4)
 
 def valid_neighbours(point):
     global cols, rows
@@ -61,6 +62,14 @@ def matrix_assign(index, value):
     global matrix
     matrix[index[0]][index[1]] = value
 
+def reconstruct_path(parent):
+    current = dest
+    while current != start:
+        current = parent[current]
+        matrix_assign(current, PATH)
+    draw_matrix()
+    pygame.display.update()
+
 def dfs(current):
     global clock
     matrix_assign(current, FRONTIER)
@@ -81,7 +90,7 @@ def bfs(current):
     q = Queue()
     matrix_assign(current, FRONTIER)
     q.put(current)
-    print(current)
+    parent = {current:None}
     while not q.empty():
         current = q.get()
         nb = valid_neighbours(current)
@@ -89,9 +98,11 @@ def bfs(current):
         for x in nb:
             if matrix_of(x) == DEST:
                 found = True
+                parent[x] = current
                 break
             if matrix_of(x) == FREE:
                 matrix_assign(x, FRONTIER)
+                parent[x] = current
                 q.put(x)
         matrix_assign(current, VISITED)
         draw_matrix()
@@ -99,10 +110,8 @@ def bfs(current):
         clock.tick(60)
         if(found):
             break
+    reconstruct_path(parent)
         
-                
-
-            
 
 
 def init_loop():
@@ -183,6 +192,8 @@ def draw_matrix():
                 color = colors["gray"]
             if matrix[i][j] == FRONTIER:
                 color = colors["orange"]
+            if matrix[i][j] == PATH:
+                color = colors["cyan"]
             pygame.draw.rect(canvas, color, (*position, square_size, square_size))
 
 
