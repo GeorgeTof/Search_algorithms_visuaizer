@@ -18,8 +18,8 @@ colors = {
     "brown": (139, 69, 19),
 }
 
-WIDTH = 400
-HEIGHT = 200
+WIDTH = 500
+HEIGHT = 300
 DEST = 3
 FRONTIER = 2
 WALL = 1
@@ -71,6 +71,9 @@ def reconstruct_path(parent):
     draw_matrix()
     pygame.display.update()
 
+
+def manhattan_distance(current):
+    return ( abs(current[0]-dest[0]) + abs(current[1]-dest[1]) );
 
 def dfs(current):
     global clock
@@ -158,7 +161,35 @@ def uniform_cost_search(current):
     if(found):
         reconstruct_path(parent)
 
-
+def a_star(current):
+    global clock
+    q = PriorityQueue()
+    matrix_assign(current, FRONTIER)
+    q.put((manhattan_distance(current),current))
+    parent = {current:current}
+    found = False
+    while not q.empty():
+        next = q.get()
+        cost = next[0]
+        current = next[1]
+        nb = valid_neighbours(current)
+        for x in nb:
+            if matrix_of(x) == DEST:
+                found = True
+                parent[x] = current
+                break
+            if matrix_of(x) == FREE:
+                matrix_assign(x, FRONTIER)
+                parent[x] = current
+                q.put((cost - manhattan_distance(parent[(current)]) + 1 + manhattan_distance(current), x))   # cost of added weights + the heuristic
+        matrix_assign(current, VISITED)
+        draw_matrix()
+        pygame.display.update()
+        clock.tick(60)
+        if(found):
+            break
+    if(found):
+        reconstruct_path(parent)
 
 def init_loop():
     global init_done, canvas, matrix, mouse_pressed, quit, mode
@@ -175,6 +206,9 @@ def init_loop():
             if event.key == pygame.K_u:
                 mode = 'u'
                 print("Mode changed to Uniform Cost Search")
+            if event.key == pygame.K_a:
+                mode = 'a'
+                print("Mode changed to A*")
             if event.key == pygame.K_RETURN:
                 init_done = 1
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -225,6 +259,8 @@ def main():
         bfs(start)
     elif mode == 'u':
         uniform_cost_search(start)
+    elif mode == 'a':
+        a_star(start)
 
     while(quit == False):
         end_loop()
