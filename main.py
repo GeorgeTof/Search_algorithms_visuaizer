@@ -125,7 +125,7 @@ def bfs(current):
         matrix_assign(current, VISITED)
         draw_matrix()
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(50)
         if(found):
             break
     if(found):
@@ -155,7 +155,7 @@ def uniform_cost_search(current):
         matrix_assign(current, VISITED)
         draw_matrix()
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(50)
         if(found):
             break
     if(found):
@@ -181,7 +181,7 @@ def a_star(current):
             if matrix_of(x) == FREE:
                 matrix_assign(x, FRONTIER)
                 parent[x] = current
-                q.put((cost - manhattan_distance(parent[(current)]) + 1 + manhattan_distance(current), x))   # cost of added weights + the heuristic
+                q.put((cost - manhattan_distance(current) + 1 + manhattan_distance(x), x))   # cost of added weights + the heuristic
         matrix_assign(current, VISITED)
         draw_matrix()
         pygame.display.update()
