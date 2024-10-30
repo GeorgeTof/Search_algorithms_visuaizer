@@ -1,6 +1,6 @@
 import pygame 
 import random
-from queue import Queue, LifoQueue
+from queue import Queue, LifoQueue, PriorityQueue
 
 colors = {
     "black": (0, 0, 0),
@@ -18,8 +18,8 @@ colors = {
     "brown": (139, 69, 19),
 }
 
-WIDTH = 300
-HEIGHT = 150
+WIDTH = 400
+HEIGHT = 200
 DEST = 3
 FRONTIER = 2
 WALL = 1
@@ -128,6 +128,36 @@ def bfs(current):
     if(found):
         reconstruct_path(parent)
         
+def uniform_cost_search(current):
+    global clock
+    q = PriorityQueue()
+    matrix_assign(current, FRONTIER)
+    q.put((0,current))
+    parent = {current:None}
+    found = False
+    while not q.empty():
+        next = q.get()
+        cost = next[0]
+        current = next[1]
+        nb = valid_neighbours(current)
+        for x in nb:
+            if matrix_of(x) == DEST:
+                found = True
+                parent[x] = current
+                break
+            if matrix_of(x) == FREE:
+                matrix_assign(x, FRONTIER)
+                parent[x] = current
+                q.put((cost + 1, x))        # to further impolement heuristic
+        matrix_assign(current, VISITED)
+        draw_matrix()
+        pygame.display.update()
+        clock.tick(60)
+        if(found):
+            break
+    if(found):
+        reconstruct_path(parent)
+
 
 
 def init_loop():
@@ -142,6 +172,9 @@ def init_loop():
             if event.key == pygame.K_b:
                 mode = 'b'
                 print("Mode changed to BFS")
+            if event.key == pygame.K_u:
+                mode = 'u'
+                print("Mode changed to Uniform Cost Search")
             if event.key == pygame.K_RETURN:
                 init_done = 1
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -190,6 +223,8 @@ def main():
         dfs(start)
     elif mode == 'b':
         bfs(start)
+    elif mode == 'u':
+        uniform_cost_search(start)
 
     while(quit == False):
         end_loop()
