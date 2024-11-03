@@ -161,6 +161,35 @@ def uniform_cost_search(current):
     if(found):
         reconstruct_path(parent)
 
+def dijkstra(current):
+    global clock
+    q = PriorityQueue()
+    matrix_assign(current, FRONTIER)
+    q.put((0,current))
+    parent = {current:None}
+    found = False
+    while not q.empty():
+        next = q.get()
+        cost = next[0]
+        current = next[1]
+        nb = valid_neighbours(current)
+        for x in nb:
+            if matrix_of(x) == DEST and not found:
+                found = True
+                parent[x] = current
+            if matrix_of(x) == FREE:
+                matrix_assign(x, FRONTIER)
+                if(not found):
+                    parent[x] = current
+                q.put((cost + 1, x))      
+        if matrix_of(current) != DEST:
+            matrix_assign(current, VISITED)
+        draw_matrix()
+        pygame.display.update()
+        clock.tick(50)
+    if(found):
+        reconstruct_path(parent)
+
 def a_star(current):
     global clock
     q = PriorityQueue()
@@ -206,6 +235,9 @@ def init_loop():
             if event.key == pygame.K_u:
                 mode = 'u'
                 print("Mode changed to Uniform Cost Search")
+            if event.key == pygame.K_j:
+                mode = 'j'
+                print("Mode changed to Dijkstra's Algorithm")
             if event.key == pygame.K_a:
                 mode = 'a'
                 print("Mode changed to A*")
@@ -259,9 +291,10 @@ def main():
         bfs(start)
     elif mode == 'u':
         uniform_cost_search(start)
+    elif mode == 'j':
+        dijkstra(start)
     elif mode == 'a':
         a_star(start)
-
     while(quit == False):
         end_loop()
         clock.tick(60)
