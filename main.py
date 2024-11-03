@@ -151,7 +151,7 @@ def uniform_cost_search(current):
             if matrix_of(x) == FREE:
                 matrix_assign(x, FRONTIER)
                 parent[x] = current
-                q.put((cost + 1, x))        # to further impolement heuristic
+                q.put((cost + 1, x))       
         matrix_assign(current, VISITED)
         draw_matrix()
         pygame.display.update()
@@ -213,7 +213,7 @@ def init_loop():
                 init_done = 1
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # mouse left click
-                print("Left mouse button clicked at", event.pos)
+                # print("Left mouse button clicked at", event.pos)
                 mouse_pressed = 1
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
