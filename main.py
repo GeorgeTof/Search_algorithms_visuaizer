@@ -65,9 +65,14 @@ def matrix_assign(index, value):
 
 def reconstruct_path(parent):
     current = dest
+    path = []
     while current != start:
+        path.append(current)
         current = parent[current]
         matrix_assign(current, PATH)
+    print("The path is:")
+    for element in reversed(path):
+        print(element)
     draw_matrix()
     pygame.display.update()
 
